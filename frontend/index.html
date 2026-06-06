@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahakumbh AI Assistant 2028</title>
+    <!-- Leaflet CSS/JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+                * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #FF6B35 0%, #F5A623 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #FFF9F0;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #FF6B35, #e55a2b);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .language-selector {
+            padding: 20px;
+            background: #FFF9F0;
+            text-align: center;
+            border-bottom: 1px solid #F0E6D2;
+        }
+
+        .language-selector select {
+            padding: 14px 24px;
+            font-size: 18px;
+            border-radius: 30px;
+            border: 2px solid #FF6B35;
+            background: white;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .quick-buttons {
+            display: flex;
+            gap: 15px;
+            padding: 20px;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 16px 12px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            transition: transform 0.2s;
+        }
+
+        .quick-btn:active {
+            transform: scale(0.97);
+        }
+
+        .emergency { background: #FF6B35; }
+        .events { background: #4A90E2; }
+        .family { background: #F5A623; color: #2C3E50; }
+
+        .family-panel {
+            background: #FFF9F0;
+            border: 2px solid #F0E6D2;
+            margin: 15px;
+            border-radius: 25px;
+            padding: 20px;
+            display: none;
+        }
+
+        .family-panel.show {
+            display: block;
+        }
+
+        .family-panel h3 {
+            font-size: 22px;
+            color: #F5A623;
+            margin-bottom: 15px;
+        }
+
+        .family-panel input {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border: 2px solid #F0E6D2;
+            border-radius: 15px;
+            font-size: 16px;
+            background: white;
+        }
+
+        .family-panel button {
+            width: 100%;
+            padding: 14px;
+            margin: 8px 0;
+            background: #4A90E2;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .map-container {
+            height: 350px;
+            margin: 15px;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 3px solid #F5A623;
+            background: #e0e0e0;
+        }
+
+        .map-container.hidden {
+            display: none;
+        }
+
+        .chat-area {
+            height: 350px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #FFF9F0;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+        }
+
+        .user-message { justify-content: flex-end; }
+        .bot-message { justify-content: flex-start; }
+
+        .message-content {
+            max-width: 80%;
+            padding: 15px 20px;
+            border-radius: 25px;
+            font-size: 18px;
+            line-height: 1.5;
+        }
+
+        .user-message .message-content {
+            background: #FF6B35;
+            color: white;
+        }
+
+        .bot-message .message-content {
+            background: white;
+            color: #2C3E50;
+            border: 1px solid #F0E6D2;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 20px;
+            background: #FFF9F0;
+            border-top: 1px solid #F0E6D2;
+            gap: 12px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid #F0E6D2;
+            border-radius: 30px;
+            font-size: 18px;
+            outline: none;
+            background: white;
+        }
+
+        .input-area input:focus {
+            border-color: #FF6B35;
+        }
+
+        .input-area button {
+            padding: 16px 28px;
+            background: #FF6B35;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        #voiceBtn {
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+     }
+
+       #voiceBtn:active {
+        transform: scale(0.9);
+        background: #e74c3c;}
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+            color: #666;
+            background: #FFF9F0;
+            border-top: 1px solid #F0E6D2;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .quick-btn {
+                font-size: 14px;
+                padding: 12px;
+                min-width: 90px;
+            }
+            
+            .message-content {
+                font-size: 16px;
+            }
+            
+            .input-area input {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕉️ Mahakumbh AI Assistant</h1>
+            <p>Your 24/7 Pilgrim Guide | With Family Location</p>
+        </div>
+        
+        <div class="language-selector">
+            <select id="languageSelect" onchange="translateUI(this.value)">
+    <option value="english">🇬🇧 English</option>
+    <option value="hindi">🇮🇳 हिंदी</option>
+    <option value="bengali">🇧🇩 বাংলা (Bengali)</option>
+    <option value="tamil">🇮🇳 தமிழ் (Tamil)</option>
+</select>
+        </div>
+        
+        <div class="quick-buttons">
+    <button class="quick-btn emergency" onclick="askEmergency()">🚨 Emergency</button>
+    <button class="quick-btn events" onclick="askEvents()">📅 Events</button>
+    <button class="quick-btn family" onclick="toggleFamilyPanel()">👨‍👩‍👧‍👦 Family Location</button>
+    <button class="quick-btn" onclick="shareOnWhatsApp()" style="background:#25D366;">📱 WhatsApp Share</button>
+        </div>
+        
+        <div id="familyPanel" class="family-panel">
+            <h3>👨‍👩‍👧‍👦 Family Location Sharing</h3>
+            <input type="text" id="groupName" placeholder="Group Name (e.g., tiwari)">
+            <input type="text" id="userName" placeholder="Your Name">
+            <button onclick="createGroup()">📝 Create New Group</button>
+            <button onclick="joinGroup()">🤝 Join Existing Group</button>
+            <button onclick="shareMyLocation()">📍 Share My Live Location</button>
+            <button onclick="showFamilyOnMap()">🗺️ See Family on Map</button>
+        </div>
+        
+
+        <!-- Map is ALWAYS visible but starts hidden -->
+        <div id="mapContainer" class="map-container hidden">
+            <div id="map" style="height: 100%; width: 100%;"></div>
+        </div>
+        
+        <div class="chat-area" id="chatArea">
+            <div class="message bot-message">
+                <div class="message-content">
+                    🙏 Namaste! I'm your Mahakumbh assistant.<br><br>
+                    I can help you with:<br>
+                    • 📍 Navigation (ghats, gates, transport)<br>
+                    • 🏥 Emergency & medical camps<br>
+                    • 🕉️ Aarti timings & events<br>
+                    • 🏨 Accommodation (tents, hotels)<br>
+                    • 👨‍👩‍👧‍👦 Family location tracking<br><br>
+                    <strong>Try:</strong> "Where is medical camp?" or use Family Location!
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-area">
+      <input type="text" id="userInput" placeholder="Ask me anything..." onkeypress="handleKeyPress(event)">
+      <button onclick="sendMessage()">Send</button>
+      <button id="voiceBtn" onclick="startVoiceInput()" style="background:#4A90E2; border-radius:50%; width:50px; font-size:20px;">🎤</button>
+      </div>
+        
+        <div class="footer">
+            🚨 Emergency: 112 | 🚑 Ambulance: 108 | 👮 Police: 112
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+        let currentGroupId = null;
+        let currentUserName = null;
+        let map = null;
+        let markers = {};
+
+        // Initialize map
+        function initMap() {
+            const defaultLocation = [25.4358, 81.8463];
+            
+            map = L.map('map').setView(defaultLocation, 14);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+            
+            console.log('✅ Map initialized');
+            return map;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            addMessage(message, 'user');
+            input.value = '';
+            showTyping();
+            
+            try {
+                const language = document.getElementById('languageSelect').value;
+                const response = await fetch(`${API_URL}/api/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message, language: language })
+                });
+                const data = await response.json();
+                hideTyping();
+                addMessage(data.reply, 'bot');
+            } catch (error) {
+                hideTyping();
+                addMessage('⚠️ Backend not running.', 'bot');
+            }
+        }
+
+        async function askEmergency() {
+            addMessage("🚨 Show me emergency contacts", 'user');
+            showTyping();
+            try {
+                const response = await fetch(`${API_URL}/api/emergency`);
+                const data = await response.json();
+                hideTyping();
+                addMessage(`🚨 EMERGENCY:\n📞 Ambulance: ${data.ambulance}\n📞 Police: ${data.police}\n📞 Women: ${data.women}\n📞 Child: ${data.child}`, 'bot');
+            } catch (error) {
+                hideTyping();
+                addMessage('⚠️ Could not fetch emergencies', 'bot');
+            }
+        }
+
+        async function askEvents() {
+            addMessage("📅 Show today's events", 'user');
+            showTyping();
+            try {
+                const response = await fetch(`${API_URL}/api/events`);
+                const data = await response.json();
+                hideTyping();
+                let msg = "📅 TODAY'S SCHEDULE:\n\n";
+                data.today.forEach(e => msg += `🕐 ${e.time} - ${e.event}\n📍 ${e.venue}\n\n`);
+                addMessage(msg, 'bot');
+            } catch (error) {
+                hideTyping();
+                addMessage('⚠️ Could not fetch events', 'bot');
+            }
+        }
+
+        function toggleFamilyPanel() {
+            document.getElementById('familyPanel').classList.toggle('show');
+        }
+        
+        let isListening = false;
+
+function startVoiceInput() {
+    // Check if browser supports speech recognition
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        addMessage("❌ Voice input not supported in this browser. Please use Chrome, Edge, or Safari.", 'bot');
+        return;
+    }
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    // Set language based on selected language
+    const selectedLang = document.getElementById('languageSelect').value;
+    
+    switch(selectedLang) {
+        case 'hindi':
+            recognition.lang = 'hi-IN';
+            break;
+        case 'bengali':
+            recognition.lang = 'bn-IN';
+            break;
+        case 'tamil':
+            recognition.lang = 'ta-IN';
+            break;
+        default:
+            recognition.lang = 'en-IN'; // Indian English
+    }
+    
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    
+    // Visual feedback on button
+    const voiceBtn = document.getElementById('voiceBtn');
+    voiceBtn.style.background = '#e74c3c';
+    voiceBtn.textContent = '🔴';
+    voiceBtn.style.transform = 'scale(1.1)';
+    
+    addMessage("🎤 Listening... Please speak now", 'bot');
+    
+    recognition.start();
+    isListening = true;
+    
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        const confidence = event.results[0][0].confidence;
+        
+        console.log(`Recognized: "${transcript}" (confidence: ${confidence})`);
+        
+        // Set the input field value
+        document.getElementById('userInput').value = transcript;
+        
+        // Auto-send after short delay
+        addMessage(`🎤 You said: "${transcript}"`, 'user');
+        
+        // Send the message automatically
+        setTimeout(() => {
+            sendMessage();
+        }, 500);
+        
+        isListening = false;
+    };
+    
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        
+        let errorMessage = '';
+        switch(event.error) {
+            case 'no-speech':
+                errorMessage = "❌ No speech detected. Please try again.";
+                break;
+            case 'audio-capture':
+                errorMessage = "❌ No microphone found. Please check your microphone.";
+                break;
+            case 'not-allowed':
+                errorMessage = "❌ Microphone permission denied. Please allow microphone access.";
+                break;
+            default:
+                errorMessage = `❌ Voice input error: ${event.error}. Please try again.`;
+        }
+        
+        addMessage(errorMessage, 'bot');
+        isListening = false;
+    };
+    
+    recognition.onend = () => {
+        if (isListening) {
+            // Reset button
+            voiceBtn.style.background = '#4A90E2';
+            voiceBtn.textContent = '🎤';
+            voiceBtn.style.transform = 'scale(1)';
+            
+            if (!document.getElementById('userInput').value.trim()) {
+                addMessage("🎤 Listening stopped. Please click the mic button and speak again.", 'bot');
+            }
+            isListening = false;
+        } else {
+            // Reset button
+            voiceBtn.style.background = '#4A90E2';
+            voiceBtn.textContent = '🎤';
+            voiceBtn.style.transform = 'scale(1)';
+        }
+    };
+}
+        async function createGroup() {
+            const groupId = document.getElementById('groupName').value.trim();
+            const userName = document.getElementById('userName').value.trim();
+            if (!groupId || !userName) {
+                addMessage("⚠️ Enter both Group Name and Your Name", 'bot');
+                return;
+            }
+            try {
+                const response = await fetch(`${API_URL}/api/create-group`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ group_id: groupId, user_name: userName })
+                });
+                if (response.ok) {
+                    currentGroupId = groupId;
+                    currentUserName = userName;
+                    addMessage(`✅ Group '${groupId}' created! Share this code with family.`, 'bot');
+                } else {
+                    addMessage(`❌ Group creation failed`, 'bot');
+                }
+            } catch (error) {
+                addMessage('❌ Error - is backend running?', 'bot');
+            }
+        }
+
+        async function joinGroup() {
+            const groupId = document.getElementById('groupName').value.trim();
+            const userName = document.getElementById('userName').value.trim();
+            if (!groupId || !userName) {
+                addMessage("⚠️ Enter both Group Name and Your Name", 'bot');
+                return;
+            }
+            try {
+                const response = await fetch(`${API_URL}/api/join-group`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ group_id: groupId, user_name: userName })
+                });
+                if (response.ok) {
+                    currentGroupId = groupId;
+                    currentUserName = userName;
+                    addMessage(`✅ Joined group '${groupId}' as ${userName}`, 'bot');
+                } else {
+                    addMessage(`❌ Could not join group`, 'bot');
+                }
+            } catch (error) {
+                addMessage('❌ Error joining group', 'bot');
+            }
+        }
+        function shareOnWhatsApp() {
+    // Get current location if available
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const googleMapsLink = `https://maps.google.com/?q=${lat},${lng}`;
+            const message = `🚨 EMERGENCY - MAHAKUMBH 2028 🚨\n\nI need immediate help!\n📍 My live location: ${googleMapsLink}\n📞 Emergency Helpline: 112\n\nPlease send help to my location.`;
+            const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }, () => {
+            // Fallback if location not available
+            const message = `🚨 EMERGENCY - MAHAKUMBH 2028 🚨\n\nI need immediate help at Mahakumbh Mela, Prayagraj.\n\nPlease call emergency helpline: 112\n\nI'm at: Gate 3, Sector 4 area.`;
+            const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        });
+    } else {
+        // Fallback if geolocation not supported
+        const message = `🚨 EMERGENCY - MAHAKUMBH 2028 🚨\n\nI need immediate help at Mahakumbh Mela, Prayagraj.\n\nPlease call emergency helpline: 112`;
+        const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+    }
+}
+        async function shareMyLocation() {
+            if (!currentGroupId || !currentUserName) {
+                addMessage("⚠️ Create or join a group first!", 'bot');
+                return;
+            }
+            if (!navigator.geolocation) {
+                addMessage("❌ Browser doesn't support location", 'bot');
+                return;
+            }
+            addMessage("📍 Sharing your location...", 'bot');
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                try {
+                    await fetch(`${API_URL}/api/share-location`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            group_id: currentGroupId,
+                            user_name: currentUserName,
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        })
+                    });
+                    addMessage(`✅ Location shared!`, 'bot');
+                } catch (error) {
+                    addMessage('❌ Error sharing', 'bot');
+                }
+            }, () => addMessage("❌ Allow location access", 'bot'));
+        }
+
+        async function showFamilyOnMap() {
+    if (!currentGroupId) {
+        addMessage("⚠️ Create or join a group first!", 'bot');
+        return;
+    }
+    
+    // Show map container
+    const mapContainer = document.getElementById('mapContainer');
+    mapContainer.classList.remove('hidden');
+    
+    // Initialize map if needed
+    if (!map) {
+        initMap();
+    } else {
+        map.invalidateSize();
+    }
+    
+    addMessage("🗺️ Loading family locations...", 'bot');
+    
+    try {
+        const response = await fetch(`${API_URL}/api/get-family-locations/${currentGroupId}`);
+        const locations = await response.json();
+        
+        // Clear existing markers
+        Object.values(markers).forEach(marker => map.removeLayer(marker));
+        markers = {};
+        
+        let bounds = L.latLngBounds();
+        let count = 0;
+        
+        // Color palette for different family members
+        const colors = ['#FF6B35', '#4A90E2', '#2ECC71', '#E74C3C', '#9B59B6', '#1ABC9C', '#F39C12', '#3498DB'];
+        
+        for (const [name, data] of Object.entries(locations)) {
+            if (data.lat !== 0 && data.lng !== 0) {
+                // Generate consistent color for each name
+                let hash = 0;
+                for (let i = 0; i < name.length; i++) {
+                    hash = ((hash << 5) - hash) + name.charCodeAt(i);
+                    hash = hash & hash;
+                }
+                const color = colors[Math.abs(hash) % colors.length];
+                
+                // Show first letter or first 2 letters of name on marker
+                const initials = name.substring(0, 2).toUpperCase();
+                
+                const markerHtml = `
+                    <div style="
+                        background-color: ${color};
+                        width: 36px;
+                        height: 36px;
+                        border-radius: 50%;
+                        border: 3px solid white;
+                        box-shadow: 0 0 5px black;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 12px;
+                        font-weight: bold;
+                        color: white;
+                        text-shadow: 0 0 2px black;
+                    ">${initials}</div>
+                `;
+                
+                const customIcon = L.divIcon({
+                    html: markerHtml,
+                    iconSize: [40, 40],
+                    popupAnchor: [0, -18],
+                    className: 'custom-marker'
+                });
+                
+                const marker = L.marker([data.lat, data.lng], { icon: customIcon })
+                    .bindPopup(`
+                        <b>${name}</b> ${name === currentUserName ? '(YOU)' : ''}<br>
+                        📍 Updated: ${new Date(data.last_update).toLocaleTimeString()}
+                    `)
+                    .addTo(map);
+                
+                markers[name] = marker;
+                bounds.extend([data.lat, data.lng]);
+                count++;
+            }
+        }
+        
+        if (count > 0) {
+            map.fitBounds(bounds);
+            addMessage(`🗺️ Showing ${count} family member(s) on map.\n📌 Each marker shows person's initials!\n🔴 ${currentUserName} (YOU) appears with your initials.`, 'bot');
+        } else {
+            addMessage("📍 No locations yet. Ask family to share their location!", 'bot');
+            map.setView([25.4358, 81.8463], 13);
+        }
+        
+    } catch (error) {
+        addMessage('❌ Error fetching locations', 'bot');
+    }
+}
+        function addMessage(text, sender) {
+            const chatArea = document.getElementById('chatArea');
+            const div = document.createElement('div');
+            div.className = `message ${sender}-message`;
+            div.innerHTML = `<div class="message-content">${text.replace(/\n/g, '<br>')}</div>`;
+            chatArea.appendChild(div);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function showTyping() {
+            const chatArea = document.getElementById('chatArea');
+            const typing = document.createElement('div');
+            typing.className = 'message bot-message';
+            typing.id = 'typingIndicator';
+            typing.innerHTML = '<div class="message-content"><em>🤖 Typing...</em></div>';
+            chatArea.appendChild(typing);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function hideTyping() {
+            const typing = document.getElementById('typingIndicator');
+            if (typing) typing.remove();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') sendMessage();
+        }
+        function translateUI(language) {
+    const translations = {
+        'english': {
+            'headerTitle': '🕉️ Mahakumbh AI Assistant',
+            'headerSubtitle': 'Your 24/7 Pilgrim Guide | With Family Location',
+            'emergencyBtn': '🚨 Emergency',
+            'eventsBtn': '📅 Events',
+            'familyBtn': '👨‍👩‍👧‍👦 Family Location',
+            'whatsappBtn': '📱 WhatsApp Share',
+            'familyPanelTitle': '👨‍👩‍👧‍👦 Family Location Sharing',
+            'groupNamePlaceholder': 'Group Name (e.g., tiwari)',
+            'userNamePlaceholder': 'Your Name',
+            'createGroupBtn': '📝 Create New Group',
+            'joinGroupBtn': '🤝 Join Existing Group',
+            'shareLocationBtn': '📍 Share My Live Location',
+            'seeFamilyMapBtn': '🗺️ See Family on Map',
+            'welcomeMsg': '🙏 Namaste! I\'m your Mahakumbh assistant.',
+            'helpList': 'I can help you with:\n• 📍 Navigation (ghats, gates, transport)\n• 🏥 Emergency & medical camps\n• 🕉️ Aarti timings & events\n• 🏨 Accommodation (tents, hotels)\n• 👨‍👩‍👧‍👦 Family location tracking',
+            'tryMsg': 'Try: "Where is medical camp?" or use Family Location!',
+            'inputPlaceholder': 'Ask me anything...',
+            'sendBtn': 'Send',
+            'footer': '🚨 Emergency: 112 | 🚑 Ambulance: 108 | 👮 Police: 112'
+        },
+        'hindi': {
+            'headerTitle': '🕉️ महाकुंभ AI सहायक',
+            'headerSubtitle': 'आपका 24/7 तीर्थ मार्गदर्शक | परिवार स्थान के साथ',
+            'emergencyBtn': '🚨 आपातकालीन',
+            'eventsBtn': '📅 कार्यक्रम',
+            'familyBtn': '👨‍👩‍👧‍👦 परिवार का स्थान',
+            'whatsappBtn': '📱 व्हाट्सएप शेयर',
+            'familyPanelTitle': '👨‍👩‍👧‍👦 परिवार स्थान साझाकरण',
+            'groupNamePlaceholder': 'समूह का नाम (जैसे, तिवारी)',
+            'userNamePlaceholder': 'आपका नाम',
+            'createGroupBtn': '📝 नया समूह बनाएं',
+            'joinGroupBtn': '🤝 मौजूदा समूह में शामिल हों',
+            'shareLocationBtn': '📍 मेरा स्थान साझा करें',
+            'seeFamilyMapBtn': '🗺️ मानचित्र पर परिवार देखें',
+            'welcomeMsg': '🙏 नमस्ते! मैं आपका महाकुंभ सहायक हूँ।',
+            'helpList': 'मैं आपकी मदद कर सकता हूँ:\n• 📍 नेविगेशन (घाट, गेट, परिवहन)\n• 🏥 आपातकालीन और मेडिकल कैंप\n• 🕉️ आरती का समय और कार्यक्रम\n• 🏨 आवास (टेंट, होटल)\n• 👨‍👩‍👧‍👦 परिवार स्थान ट्रैकिंग',
+            'tryMsg': 'पूछें: "मेडिकल कैंप कहाँ है?" या परिवार स्थान का उपयोग करें!',
+            'inputPlaceholder': 'मुझसे कुछ भी पूछें...',
+            'sendBtn': 'भेजें',
+            'footer': '🚨 आपातकालीन: 112 | 🚑 एम्बुलेंस: 108 | 👮 पुलिस: 112'
+        },
+        'bengali': {
+            'headerTitle': '🕉️ মহাকুম্ভ এআই সহায়ক',
+            'headerSubtitle': 'আপনার 24/7 তীর্থযাত্রী গাইড | পারিবারিক অবস্থান সহ',
+            'emergencyBtn': '🚨 জরুরি',
+            'eventsBtn': '📅 অনুষ্ঠান',
+            'familyBtn': '👨‍👩‍👧‍👦 পরিবারের অবস্থান',
+            'whatsappBtn': '📱 হোয়াটসঅ্যাপ শেয়ার',
+            'familyPanelTitle': '👨‍👩‍👧‍👦 পারিবারিক অবস্থান ভাগাভাগি',
+            'groupNamePlaceholder': 'গ্রুপের নাম (যেমন, তিওয়ারি)',
+            'userNamePlaceholder': 'আপনার নাম',
+            'createGroupBtn': '📝 নতুন গ্রুপ তৈরি করুন',
+            'joinGroupBtn': '🤝 বিদ্যমান গ্রুপে যোগ দিন',
+            'shareLocationBtn': '📍 আমার অবস্থান শেয়ার করুন',
+            'seeFamilyMapBtn': '🗺️ মানচিত্রে পরিবার দেখুন',
+            'welcomeMsg': '🙏 নমস্কার! আমি আপনার মহাকুম্ভ সহায়ক।',
+            'helpList': 'আমি সাহায্য করতে পারি:\n• 📍 নেভিগেশন (ঘাট, গেট, পরিবহন)\n• 🏥 জরুরি ও মেডিকেল ক্যাম্প\n• 🕉️ আরতির সময় ও অনুষ্ঠান\n• 🏨 আবাসন (টেন্ট, হোটেল)\n• 👨‍👩‍👧‍👦 পারিবারিক অবস্থান ট্র্যাকিং',
+            'tryMsg': 'জিজ্ঞাসা করুন: "মেডিকেল ক্যাম্প কোথায়?" বা পারিবারিক অবস্থান ব্যবহার করুন!',
+            'inputPlaceholder': 'আমাকে কিছু জিজ্ঞাসা করুন...',
+            'sendBtn': 'পাঠান',
+            'footer': '🚨 জরুরি: 112 | 🚑 অ্যাম্বুলেন্স: 108 | 👮 পুলিশ: 112'
+        },
+        'tamil': {
+            'headerTitle': '🕉️ மகாகும்ப் AI உதவியாளர்',
+            'headerSubtitle': 'உங்கள் 24/7 யாத்ரீக வழிகாட்டி | குடும்ப இருப்பிடத்துடன்',
+            'emergencyBtn': '🚨 அவசர',
+            'eventsBtn': '📅 நிகழ்வுகள்',
+            'familyBtn': '👨‍👩‍👧‍👦 குடும்ப இருப்பிடம்',
+            'whatsappBtn': '📱 வாட்ஸ்அப் பகிர்',
+            'familyPanelTitle': '👨‍👩‍👧‍👦 குடும்ப இருப்பிடப் பகிர்வு',
+            'groupNamePlaceholder': 'குழுப் பெயர் (எ.கா., திவாரி)',
+            'userNamePlaceholder': 'உங்கள் பெயர்',
+            'createGroupBtn': '📝 புதிய குழு உருவாக்கு',
+            'joinGroupBtn': '🤝 இருக்கும் குழுவில் சேர்',
+            'shareLocationBtn': '📍 என் இருப்பிடத்தைப் பகிர்',
+            'seeFamilyMapBtn': '🗺️ குடும்பத்தை வரைபடத்தில் காண்க',
+            'welcomeMsg': '🙏 வணக்கம்! நான் உங்கள் மகாகும்ப் உதவியாளர்.',
+            'helpList': 'நான் உதவ முடியும்:\n• 📍 வழிச்செலுத்தல் (துறை, வாயில், போக்குவரத்து)\n• 🏥 அவசர மற்றும் மருத்துவ முகாம்கள்\n• 🕉️ ஆரத்தி நேரங்கள் மற்றும் நிகழ்வுகள்\n• 🏨 தங்குமிடம் (கூடாரங்கள், ஹோட்டல்கள்)\n• 👨‍👩‍👧‍👦 குடும்ப இருப்பிடக் கண்காணிப்பு',
+            'tryMsg': 'கேளுங்கள்: "மருத்துவ முகாம் எங்கே?" அல்லது குடும்ப இருப்பிடத்தைப் பயன்படுத்துங்கள்!',
+            'inputPlaceholder': 'என்னிடம் எதுவும் கேளுங்கள்...',
+            'sendBtn': 'அனுப்பு',
+            'footer': '🚨 அவசர: 112 | 🚑 ஆம்புலன்ஸ்: 108 | 👮 போலீஸ்: 112'
+        }
+    };
+    
+    const t = translations[language] || translations['english'];
+    
+    document.querySelector('.header h1').textContent = t.headerTitle;
+    document.querySelector('.header p').textContent = t.headerSubtitle;
+    
+    const btns = document.querySelectorAll('.quick-btn');
+    btns[0].textContent = t.emergencyBtn;
+    btns[1].textContent = t.eventsBtn;
+    btns[2].textContent = t.familyBtn;
+    btns[3].textContent = t.whatsappBtn;
+    
+    document.querySelector('#familyPanel h3').textContent = t.familyPanelTitle;
+    document.querySelector('#groupName').placeholder = t.groupNamePlaceholder;
+    document.querySelector('#userName').placeholder = t.userNamePlaceholder;
+    
+    const familyBtns = document.querySelectorAll('#familyPanel button');
+    familyBtns[0].textContent = t.createGroupBtn;
+    familyBtns[1].textContent = t.joinGroupBtn;
+    familyBtns[2].textContent = t.shareLocationBtn;
+    familyBtns[3].textContent = t.seeFamilyMapBtn;
+    
+    document.querySelector('#userInput').placeholder = t.inputPlaceholder;
+    document.querySelector('.input-area button').textContent = t.sendBtn;
+    document.querySelector('.footer').innerHTML = t.footer;
+    
+    // Update welcome message in chat (first bot message)
+    const firstMessage = document.querySelector('#chatArea .bot-message:first-child .message-content');
+    if (firstMessage) {
+        firstMessage.innerHTML = `${t.welcomeMsg}<br><br>${t.helpList.replace(/\n/g, '<br>')}<br><br><strong>${t.tryMsg}</strong>`;
+    }
+}
+
+        // Test connection
+        async function testConnection() {
+            try {
+                await fetch(`${API_URL}/api/health`);
+                console.log('✅ Backend connected');
+            } catch (error) {
+                setTimeout(() => addMessage("⚠️ Backend not running. Start it with: cd ~/Desktop/mahakumbh/backend && source venv/bin/activate && python -m uvicorn main:app --reload --port 8000", 'bot'), 1000);
+            }
+        }
+        
+        testConnection();
+    </script>
+</body>
+</html>
