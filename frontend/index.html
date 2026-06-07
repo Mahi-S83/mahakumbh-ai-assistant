@@ -446,20 +446,27 @@ function loadFromStorage() {
     if (savedGroupId && savedUserName) {
         currentGroupId = savedGroupId;
         currentUserName = savedUserName;
-        addMessage(`✅ Auto-rejoined group '${savedGroupId}' as ${savedUserName}`, 'bot');
-        
-        // Auto-fetch family locations
-        setTimeout(() => {
-            showFamilyOnMap();
-        }, 1000);
+        // Just inform, don't auto-rejoin or auto-show map
+        addMessage(`💡 Saved group '${savedGroupId}' found. Click 'See Family on Map' to rejoin.`, 'bot');
         return true;
     }
     return false;
 }
 
 // Call this when page loads
+// Call this when page loads - DO NOT auto-rejoin
 window.addEventListener('DOMContentLoaded', () => {
-    loadFromStorage();
+    // Only check for saved group but don't auto-join
+    const savedGroupId = localStorage.getItem('kumbh_groupId');
+    const savedUserName = localStorage.getItem('kumbh_userName');
+    
+    if (savedGroupId && savedUserName) {
+        // Just store in variables but don't auto-show map
+        currentGroupId = savedGroupId;
+        currentUserName = savedUserName;
+        // Don't auto-fetch - let user click "See Family on Map"
+        addMessage(`💡 Saved group '${savedGroupId}' found. Click 'See Family on Map' to rejoin.`, 'bot');
+    }
 });
 
         async function sendMessage() {
