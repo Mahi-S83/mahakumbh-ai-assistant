@@ -377,7 +377,40 @@ function hideMap() {
 }
 
 // Leave group and reset everything
-function leaveGroup() {
+async function leaveGroup() {
+    if (!currentGroupId || !currentUserName) {
+        addMessage("⚠️ You are not in any group.", 'bot');
+        return;
+    }
+    
+    // Ask for confirmation
+    if (!confirm(`Are you sure you want to leave group '${currentGroupId}'?`)) {
+        return;
+    }
+    
+    addMessage(`🚪 Leaving group '${currentGroupId}'...`, 'bot');
+    
+    try {
+        // Call backend to remove user from group
+        const response = await fetch(`${API_URL}/api/leave-group`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                group_id: currentGroupId, 
+                user_name: currentUserName 
+            })
+        });
+        
+        if (response.ok) {
+            addMessage(`✅ Left group '${currentGroupId}'.`, 'bot');
+        } else {
+            addMessage(`⚠️ Could not leave group on server, but clearing local data.`, 'bot');
+        }
+    } catch (error) {
+        console.error("Error leaving group:", error);
+        addMessage(`⚠️ Network error, but clearing local data.`, 'bot');
+    }
+    
     // Clear localStorage
     localStorage.removeItem('kumbh_groupId');
     localStorage.removeItem('kumbh_userName');
@@ -397,14 +430,13 @@ function leaveGroup() {
     if (map) {
         Object.values(markers).forEach(marker => map.removeLayer(marker));
         markers = {};
-        // Reset map view to default
         map.setView([25.4358, 81.8463], 14);
     }
     
     // Close the family panel
     document.getElementById('familyPanel').classList.remove('show');
     
-    addMessage("✅ Left group. All data reset. You can now create or join a new group.", 'bot');
+    addMessage("✅ Left group. You can now create or join a new group.", 'bot');
 }
 
 function loadFromStorage() {
