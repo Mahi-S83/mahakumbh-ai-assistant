@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from datetime import datetime, timedelta, timezone
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from google import genai
@@ -69,7 +70,8 @@ EVENTS = {
         {"time": "6:30 PM", "event": "Ganga Aarti", "venue": "Triveni Ghat"},
     ]
 }
-
+# IST timezone (UTC+5:30)
+IST = timezone(timedelta(hours=5, minutes=30))
 class ChatRequest(BaseModel):
     message: str
     language: str = "english"
@@ -157,6 +159,24 @@ async def chat(request: ChatRequest):
     # Fallback
     return ChatResponse(reply="I can help with: medical camps, lost child, aarti timings, accommodation, food, transport. What do you need?")
 
+@app.post("/api/leave-group")
+async def leave_group(request: CreateGroupRequest):
+    """Remove user from family group"""
+    if request.group_id not in family_groups:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    if request.user_name not in family_groups[request.group_id]:
+        raise HTTPException(status_code=404, detail="User not in this group")
+    
+    # Remove user from group
+    del family_groups[request.group_id][request.user_name]
+    
+    # If group becomes empty, delete the group
+    if len(family_groups[request.group_id]) == 0:
+        del family_groups[request.group_id]
+    
+    return {"status": "success", "message": f"{request.user_name} left the group"}
+
 @app.post("/api/create-group")
 async def create_group(request: CreateGroupRequest):
     if request.group_id in family_groups:
@@ -164,7 +184,7 @@ async def create_group(request: CreateGroupRequest):
     
     family_groups[request.group_id] = {
         request.user_name: {
-            "lat": 0, "lng": 0, "last_update": datetime.now().isoformat()
+            "lat": 0, "lng": 0, "last_update": datetime.now(IST).isoformat()
         }
     }
     return {"status": "success", "message": f"Group '{request.group_id}' created"}
@@ -187,7 +207,7 @@ async def share_location(request: ShareLocationRequest):
     family_groups[request.group_id][request.user_name] = {
         "lat": request.lat,
         "lng": request.lng,
-        "last_update": datetime.now().isoformat()
+        "last_update": datetime.now(IST).isoformat()
     }
     return {"status": "success"}
 

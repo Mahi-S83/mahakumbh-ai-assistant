@@ -738,7 +738,7 @@ function startVoiceInput() {
     addMessage(`🔍 Fetching family locations for group: ${currentGroupId}`, 'bot');
     
     try {
-        const response = await fetch(`${API_URL}/api/get-family-locations/${currentGroupId}`);
+        const response = await fetch(`${API_URL}/api/get-family-locations/${currentGroupId}?t=${Date.now()}`);
         const locations = await response.json();
         
         console.log("📍 Raw locations from backend:", locations);
@@ -921,7 +921,10 @@ function resetAll() {
             'tryMsg': 'Try: "Where is medical camp?" or use Family Location!',
             'inputPlaceholder': 'Ask me anything...',
             'sendBtn': 'Send',
-            'footer': '🚨 Emergency: 112 | 🚑 Ambulance: 108 | 👮 Police: 112'
+            'footer': '🚨 Emergency: 112 | 🚑 Ambulance: 108 | 👮 Police: 112',
+            'hideMapBtn': '🗺️ Hide Map',
+'leaveGroupBtn': '🚪 Leave Group & Reset',
+'resetAllBtn': '🔄 Reset All',
         },
         'hindi': {
             'headerTitle': '🕉️ महाकुंभ AI सहायक',
@@ -942,7 +945,9 @@ function resetAll() {
             'tryMsg': 'पूछें: "मेडिकल कैंप कहाँ है?" या परिवार स्थान का उपयोग करें!',
             'inputPlaceholder': 'मुझसे कुछ भी पूछें...',
             'sendBtn': 'भेजें',
-            'footer': '🚨 आपातकालीन: 112 | 🚑 एम्बुलेंस: 108 | 👮 पुलिस: 112'
+            'footer': '🚨 आपातकालीन: 112 | 🚑 एम्बुलेंस: 108 | 👮 पुलिस: 112','hideMapBtn': '🗺️ मानचित्र छुपाएं',
+'leaveGroupBtn': '🚪 समूह छोड़ें और रीसेट करें',
+'resetAllBtn': '🔄 सब रीसेट करें',
         },
         'bengali': {
             'headerTitle': '🕉️ মহাকুম্ভ এআই সহায়ক',
@@ -963,7 +968,9 @@ function resetAll() {
             'tryMsg': 'জিজ্ঞাসা করুন: "মেডিকেল ক্যাম্প কোথায়?" বা পারিবারিক অবস্থান ব্যবহার করুন!',
             'inputPlaceholder': 'আমাকে কিছু জিজ্ঞাসা করুন...',
             'sendBtn': 'পাঠান',
-            'footer': '🚨 জরুরি: 112 | 🚑 অ্যাম্বুলেন্স: 108 | 👮 পুলিশ: 112'
+            'footer': '🚨 জরুরি: 112 | 🚑 অ্যাম্বুলেন্স: 108 | 👮 পুলিশ: 112','hideMapBtn': '🗺️ মানচিত্র লুকান',
+'leaveGroupBtn': '🚪 গ্রুপ ছেড়ে রিসেট করুন',
+'resetAllBtn': '🔄 সব রিসেট করুন',
         },
         'tamil': {
             'headerTitle': '🕉️ மகாகும்ப் AI உதவியாளர்',
@@ -984,7 +991,10 @@ function resetAll() {
             'tryMsg': 'கேளுங்கள்: "மருத்துவ முகாம் எங்கே?" அல்லது குடும்ப இருப்பிடத்தைப் பயன்படுத்துங்கள்!',
             'inputPlaceholder': 'என்னிடம் எதுவும் கேளுங்கள்...',
             'sendBtn': 'அனுப்பு',
-            'footer': '🚨 அவசர: 112 | 🚑 ஆம்புலன்ஸ்: 108 | 👮 போலீஸ்: 112'
+            'footer': '🚨 அவசர: 112 | 🚑 ஆம்புலன்ஸ்: 108 | 👮 போலீஸ்: 112',
+            'hideMapBtn': '🗺️ வரைபடத்தை மறை',
+'leaveGroupBtn': '🚪 குழுவை விட்டு வெளியேறு',
+'resetAllBtn': '🔄 அனைத்தையும் மீட்டமை',
         }
     };
     
@@ -1003,11 +1013,16 @@ function resetAll() {
     document.querySelector('#groupName').placeholder = t.groupNamePlaceholder;
     document.querySelector('#userName').placeholder = t.userNamePlaceholder;
     
-    const familyBtns = document.querySelectorAll('#familyPanel button');
-    familyBtns[0].textContent = t.createGroupBtn;
-    familyBtns[1].textContent = t.joinGroupBtn;
-    familyBtns[2].textContent = t.shareLocationBtn;
-    familyBtns[3].textContent = t.seeFamilyMapBtn;
+const familyBtns = document.querySelectorAll('#familyPanel button');
+familyBtns[0].textContent = t.createGroupBtn;
+familyBtns[1].textContent = t.joinGroupBtn;
+familyBtns[2].textContent = t.shareLocationBtn;
+familyBtns[3].textContent = t.seeFamilyMapBtn;
+familyBtns[4].textContent = t.hideMapBtn;
+familyBtns[5].textContent = t.leaveGroupBtn;
+// Update Reset All button in quick-buttons section
+const resetBtn = document.querySelector('.quick-buttons button:last-child');
+if (resetBtn) resetBtn.textContent = t.resetAllBtn;
     
     document.querySelector('#userInput').placeholder = t.inputPlaceholder;
     document.querySelector('.input-area button').textContent = t.sendBtn;
