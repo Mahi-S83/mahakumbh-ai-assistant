@@ -3,4 +3,3 @@ uvicorn
 groq
 python-dotenv
 httpx
-google-genai

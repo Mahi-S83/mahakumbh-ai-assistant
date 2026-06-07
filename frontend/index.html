@@ -349,7 +349,7 @@
         function startAutoRefresh() {
     if (refreshInterval) clearInterval(refreshInterval);
     refreshInterval = setInterval(() => {
-        if (currentGroupId && document.getElementById('mapContainer').classList.contains('show')) {
+        if (currentGroupId && document.getElementById('mapContainer').classList.contains('hidden')) {
             console.log("🔄 Auto-refreshing family locations...");
             showFamilyOnMap();
         }
@@ -495,18 +495,13 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         async function askEmergency() {
-            addMessage("🚨 Show me emergency contacts", 'user');
-            showTyping();
-            try {
-                const response = await fetch(`${API_URL}/api/emergency`);
-                const data = await response.json();
-                hideTyping();
-                addMessage(`🚨 EMERGENCY:\n📞 Ambulance: ${data.ambulance}\n📞 Police: ${data.police}\n📞 Women: ${data.women}\n📞 Child: ${data.child}`, 'bot');
-            } catch (error) {
-                hideTyping();
-                addMessage('⚠️ Could not fetch emergencies', 'bot');
-            }
-        }
+    if (confirm('🚨 Call emergency helpline 112 now?')) {
+        window.location.href = 'tel:112';
+    } else {
+        // Show numbers if they don't want to call
+        addMessage("🚨 EMERGENCY CONTACTS:\n📞 Ambulance: 108\n📞 Police: 112\n📞 Women: 1090\n📞 Child: 1098", 'bot');
+    }
+}
 
         async function askEvents() {
             addMessage("📅 Show today's events", 'user');

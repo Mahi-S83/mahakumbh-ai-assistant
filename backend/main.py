@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from datetime import datetime, timedelta, timezone
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from google import genai
+
 from groq import Groq
 import os
 from datetime import datetime, timedelta
@@ -129,8 +129,8 @@ async def chat(request: ChatRequest):
     # Check FAQ first
     for key, answer in FAQ.items():
         if key in msg_lower:
-            if request.language == "hindi":
-                return ChatResponse(reply=translate_to_hindi(answer))
+            if request.language != "english":
+              return ChatResponse(reply=translate_to_language(answer, request.language))
             return ChatResponse(reply=answer)
     
     # Check events
@@ -142,14 +142,14 @@ async def chat(request: ChatRequest):
     if groq_client:
         try:
             completion = groq_client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=[
-                    {"role": "system", "content": "You are Mahakumbh 2028 assistant. Answer briefly (max 2 sentences). Be helpful."},
-                    {"role": "user", "content": request.message}
-                ],
-                temperature=0.7,
-                max_tokens=150
-            )
+    model="llama-3.3-70b-versatile",
+    messages=[
+        {"role": "system", "content": f"You are KumbhSaathi for Mahakumbh 2028. Respond in {request.language}. Max 2 sentences."},
+        {"role": "user", "content": request.message}
+    ],
+    temperature=0.7,
+    max_tokens=150
+)
             reply = completion.choices[0].message.content
             if reply:
                 return ChatResponse(reply=reply)
@@ -195,7 +195,7 @@ async def join_group(request: CreateGroupRequest):
         raise HTTPException(status_code=404, detail="Group not found")
     
     family_groups[request.group_id][request.user_name] = {
-        "lat": 0, "lng": 0, "last_update": datetime.now().isoformat()
+        "lat": 0, "lng": 0, "last_update": datetime.now(IST).isoformat()
     }
     return {"status": "success", "message": f"Joined '{request.group_id}'"}
 
