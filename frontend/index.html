@@ -277,6 +277,7 @@
     <button class="quick-btn events" onclick="askEvents()">📅 Events</button>
     <button class="quick-btn family" onclick="toggleFamilyPanel()">👨‍👩‍👧‍👦 Family Location</button>
     <button class="quick-btn" onclick="shareOnWhatsApp()" style="background:#25D366;">📱 WhatsApp Share</button>
+     <button class="quick-btn" onclick="resetAll()" style="background:#e74c3c;">🔄 Reset All</button>
         </div>
         
         <div id="familyPanel" class="family-panel">
@@ -287,6 +288,8 @@
             <button onclick="joinGroup()">🤝 Join Existing Group</button>
             <button onclick="shareMyLocation()">📍 Share My Live Location</button>
             <button onclick="showFamilyOnMap()">🗺️ See Family on Map</button>
+<button onclick="hideMap()" style="background:#95a5a6;">🗺️ Hide Map</button>
+<button onclick="leaveGroup()" style="background:#e74c3c;">🚪 Leave Group & Reset</button>
         </div>
         
 
@@ -365,6 +368,43 @@ function saveToStorage() {
         localStorage.setItem('kumbh_groupId', currentGroupId);
         localStorage.setItem('kumbh_userName', currentUserName);
     }
+}
+// Hide map function
+function hideMap() {
+    const mapContainer = document.getElementById('mapContainer');
+    mapContainer.classList.add('hidden');
+    addMessage("🗺️ Map hidden. Click 'See Family on Map' to show again.", 'bot');
+}
+
+// Leave group and reset everything
+function leaveGroup() {
+    // Clear localStorage
+    localStorage.removeItem('kumbh_groupId');
+    localStorage.removeItem('kumbh_userName');
+    
+    // Reset variables
+    currentGroupId = null;
+    currentUserName = null;
+    
+    // Clear input fields
+    document.getElementById('groupName').value = '';
+    document.getElementById('userName').value = '';
+    
+    // Hide map container
+    document.getElementById('mapContainer').classList.add('hidden');
+    
+    // Clear markers from map
+    if (map) {
+        Object.values(markers).forEach(marker => map.removeLayer(marker));
+        markers = {};
+        // Reset map view to default
+        map.setView([25.4358, 81.8463], 14);
+    }
+    
+    // Close the family panel
+    document.getElementById('familyPanel').classList.remove('show');
+    
+    addMessage("✅ Left group. All data reset. You can now create or join a new group.", 'bot');
 }
 
 function loadFromStorage() {
@@ -784,6 +824,41 @@ function startVoiceInput() {
             chatArea.appendChild(typing);
             chatArea.scrollTop = chatArea.scrollHeight;
         }
+        // Reset everything - clear all data and refresh
+function resetAll() {
+    if (confirm('⚠️ This will clear all your data (group, location, map). Are you sure?')) {
+        // Clear localStorage
+        localStorage.clear();
+        
+        // Reset variables
+        currentGroupId = null;
+        currentUserName = null;
+        
+        // Hide map
+        document.getElementById('mapContainer').classList.add('hidden');
+        
+        // Clear markers
+        if (map) {
+            Object.values(markers).forEach(marker => map.removeLayer(marker));
+            markers = {};
+            map.setView([25.4358, 81.8463], 14);
+        }
+        
+        // Clear inputs
+        document.getElementById('groupName').value = '';
+        document.getElementById('userName').value = '';
+        document.getElementById('userInput').value = '';
+        
+        // Close family panel
+        document.getElementById('familyPanel').classList.remove('show');
+        
+        // Reload the page after 1 second for fresh start
+        addMessage("🔄 Resetting all data. Page will refresh...", 'bot');
+        setTimeout(() => {
+            location.reload();
+        }, 1500);
+    }
+}
 
         function hideTyping() {
             const typing = document.getElementById('typingIndicator');
