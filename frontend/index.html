@@ -323,6 +323,7 @@
 
     <script>
         const API_URL = 'https://kumbhsaathi-backend.onrender.com';
+        let refreshInterval = null;
         let currentGroupId = null;
         let currentUserName = null;
         let map = null;
@@ -342,6 +343,52 @@
             console.log('✅ Map initialized');
             return map;
         }
+        function startAutoRefresh() {
+    if (refreshInterval) clearInterval(refreshInterval);
+    refreshInterval = setInterval(() => {
+        if (currentGroupId && document.getElementById('mapContainer').classList.contains('show')) {
+            console.log("🔄 Auto-refreshing family locations...");
+            showFamilyOnMap();
+        }
+    }, 10000); // Refresh every 10 seconds
+}
+
+function stopAutoRefresh() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+    }
+}
+          // ============ PERSISTENCE FIX ============
+function saveToStorage() {
+    if (currentGroupId && currentUserName) {
+        localStorage.setItem('kumbh_groupId', currentGroupId);
+        localStorage.setItem('kumbh_userName', currentUserName);
+    }
+}
+
+function loadFromStorage() {
+    const savedGroupId = localStorage.getItem('kumbh_groupId');
+    const savedUserName = localStorage.getItem('kumbh_userName');
+    
+    if (savedGroupId && savedUserName) {
+        currentGroupId = savedGroupId;
+        currentUserName = savedUserName;
+        addMessage(`✅ Auto-rejoined group '${savedGroupId}' as ${savedUserName}`, 'bot');
+        
+        // Auto-fetch family locations
+        setTimeout(() => {
+            showFamilyOnMap();
+        }, 1000);
+        return true;
+    }
+    return false;
+}
+
+// Call this when page loads
+window.addEventListener('DOMContentLoaded', () => {
+    loadFromStorage();
+});
 
         async function sendMessage() {
             const input = document.getElementById('userInput');
@@ -524,6 +571,7 @@ function startVoiceInput() {
                     currentGroupId = groupId;
                     currentUserName = userName;
                     addMessage(`✅ Group '${groupId}' created! Share this code with family.`, 'bot');
+                    saveToStorage();
                 } else {
                     addMessage(`❌ Group creation failed`, 'bot');
                 }
@@ -549,6 +597,7 @@ function startVoiceInput() {
                     currentGroupId = groupId;
                     currentUserName = userName;
                     addMessage(`✅ Joined group '${groupId}' as ${userName}`, 'bot');
+                    saveToStorage();
                 } else {
                     addMessage(`❌ Could not join group`, 'bot');
                 }
@@ -614,31 +663,50 @@ function startVoiceInput() {
         return;
     }
     
-    // Show map container
-    const mapContainer = document.getElementById('mapContainer');
-    mapContainer.classList.remove('hidden');
-    
-    // Initialize map if needed
-    if (!map) {
-        initMap();
-    } else {
-        map.invalidateSize();
-    }
-    
-    addMessage("🗺️ Loading family locations...", 'bot');
+    addMessage(`🔍 Fetching family locations for group: ${currentGroupId}`, 'bot');
     
     try {
         const response = await fetch(`${API_URL}/api/get-family-locations/${currentGroupId}`);
         const locations = await response.json();
+        
+        console.log("📍 Raw locations from backend:", locations);
+        
+        // Count how many members have valid locations
+        let validCount = 0;
+        for (const [name, data] of Object.entries(locations)) {
+            if (data.lat !== 0 && data.lng !== 0) {
+                validCount++;
+                console.log(`✅ ${name}: lat=${data.lat}, lng=${data.lng}`);
+            } else {
+                console.log(`⚠️ ${name}: location not shared yet (lat=0, lng=0)`);
+            }
+        }
+        
+        if (validCount === 0) {
+            addMessage("📍 No family locations yet. Everyone needs to click 'Share My Live Location' and allow permission.", 'bot');
+            return;
+        }
+        
+        addMessage(`📍 Found ${validCount} family member(s) with shared locations. Loading map...`, 'bot');
+        
+        // Show map container
+        const mapContainer = document.getElementById('mapContainer');
+        mapContainer.classList.remove('hidden');
+        
+        // Initialize map if needed
+        if (!map) {
+            initMap();
+        } else {
+            map.invalidateSize();
+        }
         
         // Clear existing markers
         Object.values(markers).forEach(marker => map.removeLayer(marker));
         markers = {};
         
         let bounds = L.latLngBounds();
-        let count = 0;
+        let memberCount = 0;
         
-        // Color palette for different family members
         const colors = ['#FF6B35', '#4A90E2', '#2ECC71', '#E74C3C', '#9B59B6', '#1ABC9C', '#F39C12', '#3498DB'];
         
         for (const [name, data] of Object.entries(locations)) {
@@ -650,9 +718,8 @@ function startVoiceInput() {
                     hash = hash & hash;
                 }
                 const color = colors[Math.abs(hash) % colors.length];
-                
-                // Show first letter or first 2 letters of name on marker
                 const initials = name.substring(0, 2).toUpperCase();
+                const isYou = (name === currentUserName);
                 
                 const markerHtml = `
                     <div style="
@@ -660,7 +727,7 @@ function startVoiceInput() {
                         width: 36px;
                         height: 36px;
                         border-radius: 50%;
-                        border: 3px solid white;
+                        border: 3px solid ${isYou ? '#FF0000' : 'white'};
                         box-shadow: 0 0 5px black;
                         display: flex;
                         align-items: center;
@@ -680,28 +747,23 @@ function startVoiceInput() {
                 });
                 
                 const marker = L.marker([data.lat, data.lng], { icon: customIcon })
-                    .bindPopup(`
-                        <b>${name}</b> ${name === currentUserName ? '(YOU)' : ''}<br>
-                        📍 Updated: ${new Date(data.last_update).toLocaleTimeString()}
-                    `)
+                    .bindPopup(`<b>${name}</b> ${isYou ? '(YOU)' : ''}<br>📍 Updated: ${new Date(data.last_update).toLocaleTimeString()}`)
                     .addTo(map);
                 
                 markers[name] = marker;
                 bounds.extend([data.lat, data.lng]);
-                count++;
+                memberCount++;
             }
         }
         
-        if (count > 0) {
+        if (memberCount > 0) {
             map.fitBounds(bounds);
-            addMessage(`🗺️ Showing ${count} family member(s) on map.\n📌 Each marker shows person's initials!\n🔴 ${currentUserName} (YOU) appears with your initials.`, 'bot');
-        } else {
-            addMessage("📍 No locations yet. Ask family to share their location!", 'bot');
-            map.setView([25.4358, 81.8463], 13);
+            addMessage(`🗺️ Map updated! Showing ${memberCount} family member(s). ${currentUserName} (YOU) has RED border.`, 'bot');
         }
         
     } catch (error) {
-        addMessage('❌ Error fetching locations', 'bot');
+        console.error("Error fetching locations:", error);
+        addMessage('❌ Error fetching family locations. Check console for details.', 'bot');
     }
 }
         function addMessage(text, sender) {
